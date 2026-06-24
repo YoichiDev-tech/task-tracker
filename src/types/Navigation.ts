@@ -1,0 +1,1 @@
+export type PageRoute = 'home' | 'habits' | 'tasks' | 'timer' | 'more';
