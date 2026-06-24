@@ -27,11 +27,8 @@ export default function TaskItem({ task, onDelete, onToggle }: Props) {
           : 'task-status-todo'
       }`}
     >
-      <button
-        onClick={() => onToggle(task.id)}
-        className={`flex-shrink-0 ${s.color}`}
-      >
-        <Icon className="h-6 w-6" />
+      <button onClick={() => onToggle(task.id)} className="flex-shrink-0">
+        <Icon className={`h-6 w-6 ${s.color}`} />
       </button>
 
       <span

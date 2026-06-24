@@ -122,8 +122,8 @@ export default function App() {
     setPoints(prev => prev + 5);
   };
 
-  const handleStartSession = () => {
-    setActiveMinutes(prev => prev + 25);
+  const handleStartSession = (duration: number) => {
+    setActiveMinutes(prev => prev + duration);
     setPoints(prev => prev + 2);
   };
 
