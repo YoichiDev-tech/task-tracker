@@ -150,6 +150,12 @@ export default function App() {
     setPoints((prev) => prev + 5);
   };
 
+  const handleUpdateHabit = (updatedHabit: Habit) => {
+    setHabits((prev) =>
+      prev.map((h) => (h.id === updatedHabit.id ? updatedHabit : h))
+    );
+  };
+
   const handleStartSession = (duration: number) => {
     setActiveMinutes((prev) => prev + duration);
     setPoints((prev) => prev + 2);
@@ -168,6 +174,7 @@ export default function App() {
     handleDeleteTask,
     handleToggleTask,
     handleAddHabit,
+    handleUpdateHabit,
     handleStartSession,
 
     accessLevel,

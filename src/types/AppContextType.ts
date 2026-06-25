@@ -18,6 +18,7 @@ export interface AppContextType {
   handleToggleTask: (taskId: number) => void;
 
   handleAddHabit: (habit: Habit) => void;
+  handleUpdateHabit: (habit: Habit) => void;
   handleStartSession: (duration: number) => void;
 
   accessLevel: "demo" | "full" | "developer";

@@ -13,10 +13,11 @@ Task-Tracker
 A modern, mobile‑first productivity app built with React + TypeScript.
 Designed to help users manage tasks, build habits, and stay focused 
 with a premium multi‑mode timer.
+Everything is stored locally, works offline and feels like a real mobile app.
 
 ## CURRENT VERSION
 
-MVP v2.0 - 24/06/2026
+MVP v2.1 - 24/06/2026
 
 This release introduces the Premium Focus Timer System, including:
 
@@ -38,12 +39,12 @@ Timer Features
 - Total sessions
 - Points earned per session
 
-UI/UX
+UI/UX Improvements
 - Icon‑based glowing tab selector
 - Improved layout
 - Better mobile experience
 - Cleaner forms
-- Better habit creation flow
+- Smoother habit creation flow
 
 
 ## FEATURES
@@ -234,10 +235,11 @@ Session history
 
 ## BUGS (on current commit)
 
-Outdated (now fixed)
+### Outdated (now fixed)
 - Focus time limit at 25min
 - Improve tasks input and habits creation
 
+### Still pending
 - No backend sync yet
 - No animations on page transitions
 - No drag‑and‑drop for tasks

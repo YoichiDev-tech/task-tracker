@@ -13,7 +13,7 @@ export default function TimerPage() {
   );
 
   const [hours, setHours] = useState(0);
-  const [minutes, setMinutes] = useState(25);
+  const [minutes, setMinutes] = useState(0);
 
   const [showLockedModal, setShowLockedModal] = useState(false);
   const [showKeyModal, setShowKeyModal] = useState(false);
