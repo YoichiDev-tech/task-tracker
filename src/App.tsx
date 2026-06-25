@@ -1,5 +1,5 @@
-﻿import { useEffect, useState } from "react";
-import React from "react";
+﻿import React from "react";
+import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import { Habit } from "./types/Habit";
@@ -31,9 +31,7 @@ function getDefaultHabits(): Habit[] {
   ];
 }
 
-export const AppContext = React.createContext<AppContextType | undefined>(
-  undefined
-);
+export const AppContext = React.createContext<AppContextType | undefined>(undefined);
 
 export default function App() {
   const [theme, setTheme] = useState<"light" | "dark">(() => {
@@ -46,12 +44,9 @@ export default function App() {
     setTheme((t) => (t === "light" ? "dark" : "light"));
   };
 
-  const [accessLevel, setAccessLevel] = useState<
-    "demo" | "full" | "developer"
-  >(() => {
+  const [accessLevel, setAccessLevel] = useState<"demo" | "full" | "developer">(() => {
     const saved = localStorage.getItem(ACCESS_LEVEL_KEY);
-    if (saved === "demo" || saved === "full" || saved === "developer")
-      return saved;
+    if (saved === "demo" || saved === "full" || saved === "developer") return saved;
     return "demo";
   });
 
@@ -68,14 +63,12 @@ export default function App() {
   const [points, setPoints] = useState(120);
   const [activeMinutes, setActiveMinutes] = useState(0);
 
-  // New - needed for calendar data
-  const [focusSessions, setFocusSessions] = useState<
-    { date: string; minutes: number }[]
-  >([]);
+  // User name
+  const [userName, setUserName] = useState(() => {
+    return localStorage.getItem("task-tracker-username") || "";
+  });
 
-  // NEW — Language setting
-  const [language, setLanguage] = useState("en");
-
+  // Theme persistence
   useEffect(() => {
     const root = document.documentElement;
     if (theme === "dark") {
@@ -88,6 +81,7 @@ export default function App() {
     localStorage.setItem(APP_THEME_KEY, theme);
   }, [theme]);
 
+  // LOAD EVERYTHING INCLUDING userName
   useEffect(() => {
     const saved = localStorage.getItem(APP_STORAGE_KEY);
     if (!saved) {
@@ -102,24 +96,41 @@ export default function App() {
         habits?: Habit[];
         points?: number;
         activeMinutes?: number;
+        accessLevel?: "demo" | "full" | "developer";
+        userName?: string;
       };
 
       setTasks(payload.tasks ?? getDefaultTasks());
       setHabits(payload.habits ?? getDefaultHabits());
       setPoints(payload.points ?? 120);
       setActiveMinutes(payload.activeMinutes ?? 0);
+      setAccessLevel(payload.accessLevel ?? "demo");
+      setUserName(payload.userName ?? "");
     } catch {
       setTasks(getDefaultTasks());
       setHabits(getDefaultHabits());
     }
   }, []);
 
+  // SAVE EVERYTHING INCLUDING userName
   useEffect(() => {
     localStorage.setItem(
       APP_STORAGE_KEY,
-      JSON.stringify({ tasks, habits, points, activeMinutes })
+      JSON.stringify({
+        tasks,
+        habits,
+        points,
+        activeMinutes,
+        accessLevel,
+        userName,
+      })
     );
-  }, [tasks, habits, points, activeMinutes]);
+  }, [tasks, habits, points, activeMinutes, accessLevel, userName]);
+
+  // Also save separately (your original logic)
+  useEffect(() => {
+    localStorage.setItem("task-tracker-username", userName);
+  }, [userName]);
 
   const handleAddTask = (title: string) => {
     setTasks((prev) => [...prev, { id: Date.now(), title, status: "todo" }]);
@@ -132,11 +143,7 @@ export default function App() {
 
   const handleToggleTask = (taskId: number) => {
     const next = (s: Task["status"]): Task["status"] =>
-      s === "todo"
-        ? "in-progress"
-        : s === "in-progress"
-        ? "completed"
-        : "todo";
+      s === "todo" ? "in-progress" : s === "in-progress" ? "completed" : "todo";
 
     setTasks((prev) =>
       prev.map((task) =>
@@ -151,9 +158,7 @@ export default function App() {
   };
 
   const handleUpdateHabit = (updatedHabit: Habit) => {
-    setHabits((prev) =>
-      prev.map((h) => (h.id === updatedHabit.id ? updatedHabit : h))
-    );
+    setHabits((prev) => prev.map((h) => (h.id === updatedHabit.id ? updatedHabit : h)));
   };
 
   const handleStartSession = (duration: number) => {
@@ -182,6 +187,9 @@ export default function App() {
     isDemo,
     isFull,
     isDeveloper,
+
+    userName,
+    setUserName,
   };
 
   return (

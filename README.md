@@ -5,7 +5,7 @@ Task-Tracker
 
 ## SCREENSHOT
 
-![alt text](image-2.png)
+![alt text](image-4.png)
 
 
 ## DESCRIPTION
@@ -17,7 +17,7 @@ Everything is stored locally, works offline and feels like a real mobile app.
 
 ## CURRENT VERSION
 
-MVP v2.1 - 24/06/2026
+MVP v2.2 - 25/06/2026
 
 This release introduces the Premium Focus Timer System, including:
 
@@ -236,8 +236,13 @@ Session history
 ## BUGS (on current commit)
 
 ### Outdated (now fixed)
-- Focus time limit at 25min
-- Improve tasks input and habits creation
+- Focus time locked at 0 minutes
+- Task input & habit creation flow
+- Name saving system in Settings
+- Greeting now persists across sessions
+- Developer mode unlock modal fixed
+- Contact the Developer button
+- LocalStorage schema updated for userName
 
 ### Still pending
 - No backend sync yet

@@ -53,6 +53,24 @@ body {
   color: rgb(148 163 184);
 }
 
+.light .text-title-lg,
+.light .text-title-md,
+.light .text-title-sm {
+  color: rgb(15 23 42);
+}
+
+.light .text-subtitle {
+  color: rgb(71 85 105);
+}
+
+.light .text-label {
+  color: rgb(100 116 139);
+}
+
+.light .text-body {
+  color: rgb(71 85 105);
+}
+
 @utility btn-primary {
   @apply inline-flex items-center justify-center gap-2 rounded-[var(--radius-btn)] bg-blue-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/30 transition-all duration-200 hover:bg-blue-600 active:scale-[0.98];
 }
@@ -69,12 +87,36 @@ body {
   @apply p-2 rounded-xl hover:bg-slate-800 transition-colors duration-200;
 }
 
+.light .btn-primary {
+  @apply bg-blue-600 text-white hover:bg-blue-700;
+}
+
+.light .btn-secondary {
+  @apply bg-slate-200 text-slate-800 hover:bg-slate-300;
+}
+
+.light .btn-danger {
+  @apply bg-red-500 text-white hover:bg-red-600;
+}
+
+.light .btn-icon {
+  @apply hover:bg-slate-200;
+}
+
 @utility card-base {
   @apply rounded-[var(--radius-card)] border border-slate-800 bg-slate-900/70 p-5 shadow-[var(--shadow-card)] backdrop-blur-md;
 }
 
 @utility card-elevated {
   @apply rounded-[var(--radius-card)] border border-slate-700 bg-slate-900/90 p-6 shadow-[var(--shadow-soft)] backdrop-blur-xl;
+}
+
+.light .card-base {
+  @apply bg-white border-slate-200 shadow-md;
+}
+
+.light .card-elevated {
+  @apply bg-white border-slate-300 shadow-xl;
 }
 
 @utility badge-primary {
@@ -93,6 +135,10 @@ body {
   @apply w-full rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
 }
 
+.light .input-base {
+  @apply bg-white border-slate-300 text-slate-900 placeholder:text-slate-500;
+}
+
 @utility task-row {
   @apply flex items-center gap-4 rounded-xl border border-slate-800 bg-slate-900 px-4 py-3 transition-all duration-200;
 }
@@ -109,30 +155,6 @@ body {
   @apply border-emerald-700 bg-emerald-950/30;
 }
 
-.light body {
-  @apply bg-white text-slate-900;
-}
-
-.light .card-base {
-  @apply bg-white border-slate-200 shadow-lg;
-}
-
-.light .card-elevated {
-  @apply bg-white border-slate-300 shadow-xl;
-}
-
-.light .btn-primary {
-  @apply bg-blue-600 text-white hover:bg-blue-700;
-}
-
-.light .btn-secondary {
-  @apply bg-slate-200 text-slate-800 hover:bg-slate-300;
-}
-
-.light .input-base {
-  @apply bg-white border-slate-300 text-slate-900;
-}
-
 .light .task-row {
   @apply bg-white border-slate-200;
 }
@@ -147,4 +169,20 @@ body {
 
 .light .task-status-completed {
   @apply bg-emerald-50 border-emerald-300;
+}
+
+.light body {
+  @apply bg-white text-slate-900;
+}
+
+* {
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+input, textarea {
+  -webkit-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
 }

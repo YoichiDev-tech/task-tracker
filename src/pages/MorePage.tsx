@@ -14,14 +14,20 @@ export default function MorePage() {
     setAccessLevel,
     isDemo,
     isFull,
-    language,
-    setLanguage,
+    userName,
+    setUserName,
   } = context;
 
   const [showLockedModal, setShowLockedModal] = useState(false);
   const [showKeyModal, setShowKeyModal] = useState(false);
   const [keyInput, setKeyInput] = useState("");
   const [error, setError] = useState("");
+
+  const [showUpdateInfo, setShowUpdateInfo] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  // Temp state for typing
+  const [tempName, setTempName] = useState("");
 
   const DEVELOPER_KEY = "Binka";
 
@@ -43,9 +49,23 @@ export default function MorePage() {
     }
   };
 
+  const handleCheckUpdates = () => {
+    setShowUpdateModal(true);
+
+    setTimeout(() => {
+      setIsUpdating(true);
+
+      setTimeout(() => {
+        setIsUpdating(false);
+        setShowUpdateModal(false);
+        alert("Your app is now up to date.");
+      }, 2000);
+
+    }, 800);
+  };
+
   return (
     <div className="p-6 pb-24 max-w-md mx-auto">
-      {/* HEADER */}
       <h1 className="text-title-md text-white light:text-slate-900">
         Settings
       </h1>
@@ -53,39 +73,62 @@ export default function MorePage() {
         Customize your experience and manage your app preferences.
       </p>
 
-      {/* APPEARANCE */}
       <div className="card-base p-4 mb-6">
         <p className="text-white light:text-slate-900 mb-3">Appearance</p>
 
-        {/* Theme Toggle */}
         <button
           onClick={toggleTheme}
           className="w-full py-3 rounded-lg bg-purple-600 text-white mb-4"
         >
           Toggle Theme ({theme})
         </button>
-
-        {/* LANGUAGE SELECTOR */}
-        <div className="mt-4">
-          <p className="text-sm text-white light:text-slate-900 mb-2">
-            Language
-          </p>
-
-          <select
-            value={language}
-            onChange={(e) => setLanguage(e.target.value)}
-            className="w-full px-4 py-3 rounded-lg bg-slate-900 light:bg-white border border-slate-700 light:border-slate-300 text-white light:text-slate-900"
-          >
-            <option value="en">English</option>
-            <option value="it">Italiano</option>
-            <option value="es">Español</option>
-          </select>
-        </div>
       </div>
 
-      {/* PREMIUM SECTIONS */}
+      <div className="card-base p-4 mb-6">
+        <p className="text-white light:text-slate-900 mb-2">Contact Developer</p>
+        <p className="text-xs text-slate-400 light:text-slate-600 mb-4">
+          Have feedback, found a bug, or want to request a feature?
+        </p>
+
+        <button
+          onClick={() => window.location.href = "mailto:yoichi_dev@proton.me"}
+          className="btn-primary w-full"
+        >
+          Send Email
+        </button>
+      </div>
+
+      <div className="card-base p-4 mb-6">
+        <p className="text-white light:text-slate-900 mb-2">Your Name</p>
+
+        <div className="flex gap-2">
+          <input 
+          type="text"
+          value={tempName}
+          onChange={(e) => setTempName(e.target.value)}
+          placeholder="Enter your name"
+          className="input-base"
+        />
+
+        <button
+        onClick={() => {
+          setUserName(tempName); 
+          setTempName("");
+        }}
+        className="px-4 py-2 rounded-lg bg-purple-600 text-white text-sm"
+        >
+          Save
+        </button>
+        </div>
+
+        {userName && (
+          <p className="text-xs text-slate-400 light:text-slate-600 mt-2">
+            Saved name: <span className="font-semibold">{userName}</span>
+          </p>
+        )}
+      </div>
+
       <div className="space-y-4 mb-10">
-        {/* DASHBOARD */}
         <div className="card-base p-4 opacity-100">
           <div className="flex items-center justify-between">
             <p className="text-white light:text-slate-900">Dashboard</p>
@@ -104,7 +147,6 @@ export default function MorePage() {
           )}
         </div>
 
-        {/* NOTIFICATIONS */}
         <div className="card-base p-4 opacity-100">
           <div className="flex items-center justify-between">
             <p className="text-white light:text-slate-900">Notifications</p>
@@ -123,7 +165,6 @@ export default function MorePage() {
           )}
         </div>
 
-        {/* CALENDAR SYNC */}
         <div className="card-base p-4 opacity-100">
           <div className="flex items-center justify-between">
             <p className="text-white light:text-slate-900">Calendar Sync</p>
@@ -143,7 +184,30 @@ export default function MorePage() {
         </div>
       </div>
 
-      {/* ACCESS LEVEL */}
+      <div className="card-base p-4 mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-white light:text-slate-900">App Version</p>
+
+          <button
+            onClick={() => setShowUpdateInfo(true)}
+            className="text-slate-400 light:text-slate-600 hover:text-slate-200 light:hover:text-slate-800"
+          >
+            ⓘ
+          </button>
+        </div>
+
+        <p className="text-sm text-slate-400 light:text-slate-600 mb-4">
+          Version 1.0.0
+        </p>
+
+        <button
+          onClick={handleCheckUpdates}
+          className="btn-primary w-full"
+        >
+          Check for Updates
+        </button>
+      </div>
+
       <div className="mt-12 pt-6 border-t border-slate-800 light:border-slate-300">
         <p className="text-xs text-slate-500 light:text-slate-600 mb-2">
           Access Level: {accessLevel}
@@ -169,7 +233,6 @@ export default function MorePage() {
         )}
       </div>
 
-      {/* LOCKED MODAL */}
       {showLockedModal && (
         <LockedFeatureModal
           onClose={() => setShowLockedModal(false)}
@@ -177,7 +240,6 @@ export default function MorePage() {
         />
       )}
 
-      {/* KEY ENTRY MODAL */}
       {showKeyModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="card-base max-w-sm w-full p-5">
@@ -198,7 +260,7 @@ export default function MorePage() {
               value={keyInput}
               onChange={(e) => setKeyInput(e.target.value)}
               placeholder="Enter key"
-              className="w-full px-4 py-3 rounded-lg bg-slate-900 light:bg:white border border-slate-700 light:border-slate-300 text-white light:text-slate-900"
+              className="w-full px-4 py-3 rounded-lg bg-slate-900 light:bg-white border border-slate-700 light:border-slate-300 text-white light:text-slate-900"
             />
 
             {error && (
@@ -211,6 +273,31 @@ export default function MorePage() {
             >
               Unlock
             </button>
+          </div>
+        </div>
+      )}
+
+      {showUpdateInfo && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="card-base max-w-sm w-full p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-title-sm text-white light:text-slate-900">
+                What's New
+              </h3>
+              <button
+                onClick={() => setShowUpdateInfo(false)}
+                className="text-slate-400 light:text-slate-600 hover:text-slate-200 light:hover:text-slate-800"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <p className="text-body">
+              • Improved theme system  
+              • Better performance  
+              • UI refinements  
+              • Bug fixes  
+            </p>
           </div>
         </div>
       )}
