@@ -5,4 +5,5 @@ export type Habit = {
   title: string;
   frequency: HabitFrequency;
   time: string;
+  history: string[]; // array of ISO dates
 };

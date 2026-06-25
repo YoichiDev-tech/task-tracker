@@ -1,68 +1,89 @@
-﻿import { useEffect, useState } from 'react';
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Habit } from './types/Habit';
-import { Task } from './types/Task';
-import BottomNav from './components/BottomNav';
-import HomePage from './pages/HomePage';
-import HabitsPage from './pages/HabitsPage';
-import TasksPage from './pages/TasksPage';
-import TimerPage from './pages/TimerPage';
-import MorePage from './pages/MorePage';
+﻿import { useEffect, useState } from "react";
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-const APP_STORAGE_KEY = 'task-tracker-app-v2';
-const APP_THEME_KEY = 'task-tracker-theme';
+import { Habit } from "./types/Habit";
+import { Task } from "./types/Task";
+import { AppContextType } from "./types/AppContextType";
+
+import BottomNav from "./components/BottomNav";
+import HomePage from "./pages/HomePage";
+import HabitsPage from "./pages/HabitsPage";
+import TasksPage from "./pages/TasksPage";
+import TimerPage from "./pages/TimerPage";
+import MorePage from "./pages/MorePage";
+
+const APP_STORAGE_KEY = "task-tracker-app-v2";
+const APP_THEME_KEY = "task-tracker-theme";
+const ACCESS_LEVEL_KEY = "task-tracker-access-level";
 
 function getDefaultTasks(): Task[] {
   return [
-    { id: 1, title: 'Review project requirements', status: 'todo' },
-    { id: 2, title: 'Complete implementation phase', status: 'in-progress' },
+    { id: 1, title: "Review project requirements", status: "todo" },
+    { id: 2, title: "Complete implementation phase", status: "in-progress" },
   ];
 }
 
 function getDefaultHabits(): Habit[] {
   return [
-    { id: 1, title: 'Daily standup', frequency: 'daily', time: '09:00' },
-    { id: 2, title: 'Weekly review', frequency: 'weekly', time: '17:00' },
+    { id: 1, title: "Daily standup", frequency: "daily", time: "09:00" },
+    { id: 2, title: "Weekly review", frequency: "weekly", time: "17:00" },
   ];
 }
 
-export interface AppContextType {
-  theme: 'light' | 'dark';
-  toggleTheme: () => void;
-  tasks: Task[];
-  habits: Habit[];
-  points: number;
-  activeMinutes: number;
-  handleAddTask: (title: string) => void;
-  handleDeleteTask: (taskId: number) => void;
-  handleToggleTask: (taskId: number) => void;
-  handleAddHabit: (habit: Habit) => void;
-  handleStartSession: () => void;
-}
-
-export const AppContext = React.createContext<AppContextType | undefined>(undefined);
+export const AppContext = React.createContext<AppContextType | undefined>(
+  undefined
+);
 
 export default function App() {
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
     const saved = localStorage.getItem(APP_THEME_KEY);
-    if (saved === 'light' || saved === 'dark') return saved;
-    return 'dark';
+    if (saved === "light" || saved === "dark") return saved;
+    return "dark";
   });
+
+  const toggleTheme = () => {
+    setTheme((t) => (t === "light" ? "dark" : "light"));
+  };
+
+  const [accessLevel, setAccessLevel] = useState<
+    "demo" | "full" | "developer"
+  >(() => {
+    const saved = localStorage.getItem(ACCESS_LEVEL_KEY);
+    if (saved === "demo" || saved === "full" || saved === "developer")
+      return saved;
+    return "demo";
+  });
+
+  const isDemo = accessLevel === "demo";
+  const isFull = accessLevel === "full" || accessLevel === "developer";
+  const isDeveloper = accessLevel === "developer";
+
+  useEffect(() => {
+    localStorage.setItem(ACCESS_LEVEL_KEY, accessLevel);
+  }, [accessLevel]);
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [habits, setHabits] = useState<Habit[]>([]);
   const [points, setPoints] = useState(120);
   const [activeMinutes, setActiveMinutes] = useState(0);
 
+  // New - needed for calendar data
+  const [focusSessions, setFocusSessions] = useState<
+    { date: string; minutes: number }[]
+  >([]);
+
+  // NEW — Language setting
+  const [language, setLanguage] = useState("en");
+
   useEffect(() => {
     const root = document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-      root.classList.remove('light');
+    if (theme === "dark") {
+      root.classList.add("dark");
+      root.classList.remove("light");
     } else {
-      root.classList.add('light');
-      root.classList.remove('dark');
+      root.classList.add("light");
+      root.classList.remove("dark");
     }
     localStorage.setItem(APP_THEME_KEY, theme);
   }, [theme]);
@@ -74,6 +95,7 @@ export default function App() {
       setHabits(getDefaultHabits());
       return;
     }
+
     try {
       const payload = JSON.parse(saved) as {
         tasks?: Task[];
@@ -81,6 +103,7 @@ export default function App() {
         points?: number;
         activeMinutes?: number;
       };
+
       setTasks(payload.tasks ?? getDefaultTasks());
       setHabits(payload.habits ?? getDefaultHabits());
       setPoints(payload.points ?? 120);
@@ -99,50 +122,59 @@ export default function App() {
   }, [tasks, habits, points, activeMinutes]);
 
   const handleAddTask = (title: string) => {
-    setTasks(prev => [...prev, { id: Date.now(), title, status: 'todo' }]);
-    setPoints(prev => prev + 10);
+    setTasks((prev) => [...prev, { id: Date.now(), title, status: "todo" }]);
+    setPoints((prev) => prev + 10);
   };
 
   const handleDeleteTask = (taskId: number) => {
-    setTasks(prev => prev.filter(task => task.id !== taskId));
+    setTasks((prev) => prev.filter((task) => task.id !== taskId));
   };
 
   const handleToggleTask = (taskId: number) => {
-    const next = (s: Task['status']): Task['status'] =>
-      s === 'todo' ? 'in-progress' : s === 'in-progress' ? 'completed' : 'todo';
-    setTasks(prev =>
-      prev.map(task =>
+    const next = (s: Task["status"]): Task["status"] =>
+      s === "todo"
+        ? "in-progress"
+        : s === "in-progress"
+        ? "completed"
+        : "todo";
+
+    setTasks((prev) =>
+      prev.map((task) =>
         task.id === taskId ? { ...task, status: next(task.status) } : task
       )
     );
   };
 
   const handleAddHabit = (habit: Habit) => {
-    setHabits(prev => [...prev, habit]);
-    setPoints(prev => prev + 5);
+    setHabits((prev) => [...prev, habit]);
+    setPoints((prev) => prev + 5);
   };
 
   const handleStartSession = (duration: number) => {
-    setActiveMinutes(prev => prev + duration);
-    setPoints(prev => prev + 2);
-  };
-
-  const toggleTheme = () => {
-    setTheme(t => (t === 'light' ? 'dark' : 'light'));
+    setActiveMinutes((prev) => prev + duration);
+    setPoints((prev) => prev + 2);
   };
 
   const value: AppContextType = {
     theme,
     toggleTheme,
+
     tasks,
     habits,
     points,
     activeMinutes,
+
     handleAddTask,
     handleDeleteTask,
     handleToggleTask,
     handleAddHabit,
     handleStartSession,
+
+    accessLevel,
+    setAccessLevel,
+    isDemo,
+    isFull,
+    isDeveloper,
   };
 
   return (

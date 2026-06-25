@@ -1,143 +1,284 @@
-import { useState, useContext } from 'react';
-import { CheckCircle2, Plus } from 'lucide-react';
-import { AppContext } from '../App';
-import { HabitFrequency } from '../types/Habit';
-
-const defaultTime = '08:00';
+import { useContext, useState } from "react";
+import { AppContext } from "../App";
+import LockedFeatureModal from "../components/LockedFeatureModal";
+import GitHubCalendar from "../components/GitHubCalendar";
+import { format, startOfWeek, addDays, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns";
 
 export default function HabitsPage() {
   const context = useContext(AppContext);
-
   if (!context) return null;
 
-  const { habits, handleAddHabit } = context;
-  const frequencies: HabitFrequency[] = ['daily', 'weekly', 'yearly'];
-  const [title, setTitle] = useState('');
-  const [frequency, setFrequency] = useState<HabitFrequency>('daily');
-  const [time, setTime] = useState(defaultTime);
+  const {
+    habits,
+    handleAddHabit,
+    handleUpdateHabit,
+    isDemo,
+    isFull,
+  } = context;
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!title.trim()) return;
+  const [newHabitTitle, setNewHabitTitle] = useState("");
+  const [newHabitFrequency, setNewHabitFrequency] = useState("daily");
+  const [newHabitTime, setNewHabitTime] = useState("09:00");
 
-    handleAddHabit({ id: Date.now(), title: title.trim(), frequency, time });
-    setTitle('');
-    setFrequency('daily');
-    setTime(defaultTime);
+  const [showLockedModal, setShowLockedModal] = useState(false);
+  const [showKeyModal, setShowKeyModal] = useState(false);
+
+  const [view, setView] = useState<"single" | "weekly" | "yearly">("single");
+  const [showMonth, setShowMonth] = useState(false);
+
+  const handleLocked = () => setShowLockedModal(true);
+  const handleUnlock = () => {
+    setShowLockedModal(false);
+    setShowKeyModal(true);
   };
 
+  const addHabit = () => {
+    if (!newHabitTitle.trim()) return;
+
+    const habit = {
+      id: Date.now(),
+      title: newHabitTitle.trim(),
+      frequency: newHabitFrequency,
+      time: newHabitTime,
+      history: [], // REQUIRED for streaks
+    };
+
+    handleAddHabit(habit);
+
+    setNewHabitTitle("");
+    setNewHabitFrequency("daily");
+    setNewHabitTime("09:00");
+  };
+
+  const completeHabit = (habitId: number) => {
+    const today = format(new Date(), "yyyy-MM-dd");
+
+    const habit = habits.find((h) => h.id === habitId);
+    if (!habit) return;
+
+    if (habit.history.includes(today)) return;
+
+    const updated = {
+      ...habit,
+      history: [...habit.history, today],
+    };
+
+    handleUpdateHabit(updated);
+  };
+
+  // WEEKLY VIEW DATA
+  const getWeeklyData = () => {
+    const start = startOfWeek(new Date(), { weekStartsOn: 1 });
+    const days = Array.from({ length: 7 }).map((_, i) => {
+      const date = addDays(start, i);
+      const key = format(date, "yyyy-MM-dd");
+
+      const count = habits.reduce(
+        (acc, h) => (h.history.includes(key) ? acc + 1 : acc),
+        0
+      );
+
+      return { date, key, count };
+    });
+
+    return days;
+  };
+
+  const weekly = getWeeklyData();
+
+  // MONTHLY VIEW DATA (for expanded weekly)
+  const getMonthlyData = () => {
+    const start = startOfMonth(new Date());
+    const end = endOfMonth(new Date());
+    const days = eachDayOfInterval({ start, end });
+
+    const map: { [date: string]: number } = {};
+
+    days.forEach((d) => {
+      const key = format(d, "yyyy-MM-dd");
+      const count = habits.reduce(
+        (acc, h) => (h.history.includes(key) ? acc + 1 : acc),
+        0
+      );
+      map[key] = count;
+    });
+
+    return map;
+  };
+
+  const monthlyData = getMonthlyData();
+
+  // YEARLY VIEW DATA
+  const getYearlyData = () => {
+    const map: { [date: string]: number } = {};
+
+    habits.forEach((habit) => {
+      habit.history.forEach((date) => {
+        map[date] = (map[date] || 0) + 1;
+      });
+    });
+
+    return map;
+  };
+
+  const yearlyData = getYearlyData();
+
   return (
-    <div className="flex flex-col min-h-screen pb-24 pt-6 px-4 sm:px-6 md:px-8 max-w-6xl mx-auto w-full">
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-3">
-          <CheckCircle2 className="h-8 w-8 text-purple-600" />
-          <h1 className="text-title-md text-white light:text-slate-900">Habit Tracking</h1>
-        </div>
-        <p className="text-subtitle">Build and maintain consistent habits for long-term success</p>
+    <div className="p-6 pb-24">
+      {/* HEADER */}
+      <h1 className="text-title-md text-white light:text-slate-900">
+        Habit Tracking
+      </h1>
+      <p className="text-sm text-slate-400 light:text-slate-600 mb-4">
+        Build and maintain consistent habits for long-term success.
+      </p>
+
+      {/* NEW TOGGLE */}
+      <div className="flex gap-2 mb-6">
+        {["single", "weekly", "yearly"].map((v) => (
+          <button
+            key={v}
+            onClick={() => setView(v as any)}
+            className={`px-4 py-2 rounded-full text-sm border ${
+              view === v
+                ? "bg-purple-600 text-white border-purple-600"
+                : "text-slate-300 light:text-slate-700 border-slate-700 light:border-slate-300"
+            }`}
+          >
+            {v.charAt(0).toUpperCase() + v.slice(1)}
+          </button>
+        ))}
       </div>
 
-      <div className="card-elevated mb-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-title-sm text-white light:text-slate-900">Create New Habit</h2>
-            <p className="text-subtitle mt-2">Set up a habit with frequency and reminder time</p>
-          </div>
-          <Plus className="h-8 w-8 text-purple-500 opacity-20" />
-        </div>
+      {/* SINGLE VIEW */}
+      {view === "single" && (
+        <>
+          {/* CREATE HABIT CARD */}
+          <div className="card-base p-4 mb-6">
+            <p className="text-xs text-slate-400 light:text-slate-600 mb-3">
+              Set up a habit with frequency and reminder time
+            </p>
 
-        {/* UPDATED FORM */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Habit name..."
-            autoFocus
-            className="w-full px-4 py-3 rounded-lg bg-slate-900 light:bg-white border border-slate-700 light:border-slate-300
-                       text-white light:text-slate-900 placeholder-slate-500 light:placeholder-slate-400
-                       focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
-          />
+            <input
+              value={newHabitTitle}
+              onChange={(e) => setNewHabitTitle(e.target.value)}
+              placeholder="Habit title"
+              className="w-full px-4 py-3 rounded-lg bg-slate-900 light:bg-white border border-slate-700 light:border-slate-300 text-white light:text-slate-900 mb-3"
+            />
 
-          <div className="grid sm:grid-cols-2 gap-4">
             <select
-              value={frequency}
-              onChange={(e) => setFrequency(e.target.value as HabitFrequency)}
-              className="px-4 py-3 rounded-lg bg-slate-900 light:bg-white border border-slate-700 light:border-slate-300
-                         text-white light:text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+              value={newHabitFrequency}
+              onChange={(e) => setNewHabitFrequency(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg bg-slate-900 light:bg-white border border-slate-700 light:border-slate-300 text-white light:text-slate-900 mb-3"
             >
-              {frequencies.map((option) => (
-                <option key={option} value={option}>
-                  {option.charAt(0).toUpperCase() + option.slice(1)}
-                </option>
-              ))}
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="yearly">Yearly</option>
             </select>
 
             <input
               type="time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              className="px-4 py-3 rounded-lg bg-slate-900 light:bg-white border border-slate-700 light:border-slate-300
-                         text-white light:text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500 transition"
+              value={newHabitTime}
+              onChange={(e) => setNewHabitTime(e.target.value)}
+              className="w-full px-4 py-3 rounded-lg bg-slate-900 light:bg-white border border-slate-700 light:border-slate-300 text-white light:text-slate-900 mb-3"
             />
+
+            <button
+              onClick={addHabit}
+              className="w-full py-3 rounded-lg bg-purple-600 text-white"
+            >
+              Add Habit
+            </button>
           </div>
 
-          <button
-            type="submit"
-            className="btn-primary w-full flex items-center justify-center gap-2 py-3 text-lg"
-          >
-            <Plus className="h-5 w-5" />
-            Add Habit
-          </button>
-        </form>
-      </div>
-
-      <div className="grid grid-cols-3 gap-4 mb-8">
-        <div className="card-base text-center">
-          <p className="text-label">Daily</p>
-          <p className="text-sm font-semibold text-white light:text-slate-900 mt-2">+5pts</p>
-        </div>
-        <div className="card-base text-center">
-          <p className="text-label">Weekly</p>
-          <p className="text-sm font-semibold text-white light:text-slate-900 mt-2">+10pts</p>
-        </div>
-        <div className="card-base text-center">
-          <p className="text-label">Yearly</p>
-          <p className="text-sm font-semibold text-white light:text-slate-900 mt-2">+50pts</p>
-        </div>
-      </div>
-
-      <div className="card-base">
-        <div className="mb-6">
-          <h2 className="text-title-sm text-white light:text-slate-900">Your Habits</h2>
-          <p className="text-subtitle mt-2 text-white light:text-slate-900">
-            Total: {habits.length} habit{habits.length !== 1 ? 's' : ''}
-          </p>
-        </div>
-
-        <div className="space-y-3">
-          {habits.length === 0 ? (
-            <div className="text-center py-12">
-              <CheckCircle2 className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-              <p className="text-slate-400">No habits yet. Create one to build consistency!</p>
-            </div>
-          ) : (
-            habits.map((habit) => (
+          {/* HABIT LIST */}
+          <div className="space-y-3">
+            {habits.map((habit) => (
               <div
                 key={habit.id}
-                className="flex items-center justify-between p-4 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition"
+                className="card-base p-4 flex items-center justify-between"
               >
                 <div>
-                  <h3 className="font-medium text-white light:text-slate-900">{habit.title}</h3>
-                  <p className="text-xs text-slate-400 mt-1">
-                    {habit.frequency} • Reminder at {habit.time}
+                  <p className="text-white light:text-slate-900">{habit.title}</p>
+                  <p className="text-xs text-slate-400 light:text-slate-600">
+                    {habit.frequency} at {habit.time}
                   </p>
                 </div>
-                <span className="badge-neutral capitalize">{habit.frequency}</span>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => completeHabit(habit.id)}
+                    className="px-3 py-2 rounded-lg bg-green-600 text-white text-xs"
+                  >
+                    Check
+                  </button>
+                </div>
               </div>
-            ))
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* WEEKLY VIEW */}
+      {view === "weekly" && (
+        <div>
+          <div className="grid grid-cols-7 gap-2 mb-3">
+            {weekly.map((d) => (
+              <div
+                key={d.key}
+                className={`w-10 h-10 rounded-lg flex items-center justify-center text-xs ${
+                  d.count > 0
+                    ? "bg-green-600 text-white"
+                    : "bg-slate-800 light:bg-slate-300 text-slate-400"
+                }`}
+              >
+                {format(d.date, "EEE")[0]}
+              </div>
+            ))}
+          </div>
+
+          <p
+            className="text-center text-xs text-slate-400 light:text-slate-600 mb-3 underline"
+            onClick={() => setShowMonth(!showMonth)}
+          >
+            Tap to check
+          </p>
+
+          {showMonth && (
+            <GitHubCalendar data={monthlyData} colorScheme="green" />
           )}
         </div>
-      </div>
+      )}
+
+      {/* YEARLY VIEW */}
+      {view === "yearly" && (
+        <GitHubCalendar data={yearlyData} colorScheme="green" />
+      )}
+
+      {/* LOCKED MODAL */}
+      {showLockedModal && (
+        <LockedFeatureModal
+          onClose={() => setShowLockedModal(false)}
+          onUnlock={handleUnlock}
+        />
+      )}
+
+      {/* REDIRECT TO SETTINGS MODAL */}
+      {showKeyModal && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="card-base max-w-sm w-full p-5">
+            <p className="text-white light:text-slate-900 mb-4">
+              Go to Settings → Unlock Full Version
+            </p>
+            <button
+              onClick={() => setShowKeyModal(false)}
+              className="w-full py-3 rounded-lg bg-purple-600 text-white"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

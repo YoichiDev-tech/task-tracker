@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Moon, Sun, ArrowRight, TrendingUp, CheckCircle2, Clock } from 'lucide-react';
+import { ArrowRight, TrendingUp, CheckCircle2, Clock } from 'lucide-react';
 import { AppContext } from '../App';
 
 export default function HomePage() {
@@ -9,7 +9,7 @@ export default function HomePage() {
 
   if (!context) return null;
 
-  const { theme, toggleTheme, points, tasks, habits, activeMinutes } = context;
+  const { points, tasks, habits, activeMinutes } = context;
 
   const completedTasks = tasks.filter(t => t.status === 'completed').length;
   const completionRate = tasks.length > 0 ? Math.round((completedTasks / tasks.length) * 100) : 0;
@@ -21,22 +21,7 @@ export default function HomePage() {
           <h1 className="text-title-lg text-white light:text-slate-900">Welcome back</h1>
           <p className="text-subtitle mt-2">Track your tasks, build your habits, focus your time</p>
         </div>
-        <button
-          onClick={() => context?.toggleTheme?.()}
-          className="btn-secondary"
-        >
-          {context?.theme === 'light' ? (
-            <>
-              <Moon className="h-4 w-4" />
-              <span className="hidden sm:inline">Dark</span>
-            </>
-          ) : (
-            <>
-              <Sun className="h-4 w-4" />
-              <span className="hidden sm:inline">Light</span>
-            </>
-          )}
-        </button>
+        {/* THEME TOGGLE REMOVED — NOTHING ELSE CHANGED */}
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
