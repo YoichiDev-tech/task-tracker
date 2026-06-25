@@ -26,8 +26,8 @@ function getDefaultTasks(): Task[] {
 
 function getDefaultHabits(): Habit[] {
   return [
-    { id: 1, title: "Daily standup", frequency: "daily", time: "09:00" },
-    { id: 2, title: "Weekly review", frequency: "weekly", time: "17:00" },
+    { id: 1, title: "Daily standup", frequency: "daily", time: "09:00", history: [] },
+    { id: 2, title: "Weekly review", frequency: "weekly", time: "17:00", history: [] },
   ];
 }
 

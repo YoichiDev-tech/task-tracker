@@ -56,11 +56,11 @@ export default function HabitsPage() {
     const habit = habits.find((h) => h.id === habitId);
     if (!habit) return;
 
-    if (habit.history.includes(today)) return;
+    if ((habit.history ?? []).includes(today)) return;
 
     const updated = {
       ...habit,
-      history: [...habit.history, today],
+      history: [...(habit.history ?? []), today],
     };
 
     handleUpdateHabit(updated);
@@ -73,8 +73,8 @@ export default function HabitsPage() {
       const date = addDays(start, i);
       const key = format(date, "yyyy-MM-dd");
 
-      const count = habits.reduce(
-        (acc, h) => (h.history.includes(key) ? acc + 1 : acc),
+      const count = (habits ?? []).reduce(
+        (acc, h) => ((h.history ?? []).includes(key) ? acc + 1 : acc),
         0
       );
 
@@ -96,8 +96,8 @@ export default function HabitsPage() {
 
     days.forEach((d) => {
       const key = format(d, "yyyy-MM-dd");
-      const count = habits.reduce(
-        (acc, h) => (h.history.includes(key) ? acc + 1 : acc),
+      const count = (habits ?? []).reduce(
+        (acc, h) => ((h.history ?? []).includes(key) ? acc + 1 : acc),
         0
       );
       map[key] = count;
@@ -112,8 +112,8 @@ export default function HabitsPage() {
   const getYearlyData = () => {
     const map: { [date: string]: number } = {};
 
-    habits.forEach((habit) => {
-      habit.history.forEach((date) => {
+    (habits ?? []).forEach((habit) => {
+      (habit.history ?? []).forEach((date) => {
         map[date] = (map[date] || 0) + 1;
       });
     });
@@ -193,7 +193,7 @@ export default function HabitsPage() {
 
           {/* HABIT LIST */}
           <div className="space-y-3">
-            {habits.map((habit) => (
+            {(habits ?? []).map((habit) => (
               <div
                 key={habit.id}
                 className="card-base p-4 flex items-center justify-between"
