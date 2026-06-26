@@ -186,3 +186,26 @@ input, textarea {
   -ms-user-select: text;
   user-select: text;
 }
+
+@keyframes rankup-slide {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, 0px);
+  }
+  80% {
+    opacity: 1;
+    transform: translate(-50%, 0px);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -10px);
+  }
+}
+
+.animate-rankup-slide {
+  animation: rankup-slide 3s ease-in-out forwards;
+}

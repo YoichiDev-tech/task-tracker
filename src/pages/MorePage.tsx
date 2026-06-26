@@ -16,6 +16,10 @@ export default function MorePage() {
     isFull,
     userName,
     setUserName,
+    alertSound,
+    setAlertSound,
+    alertVibration,
+    setAlertVibration,
   } = context;
 
   const [showLockedModal, setShowLockedModal] = useState(false);
@@ -146,6 +150,40 @@ export default function MorePage() {
             </button>
           )}
         </div>
+
+        {(isFull || isDeveloper) && (
+          <div className="card-base p-4 mt-4">
+            <h2 className="text-title-sm text-white light:text-slate-900 mb-3">
+              Timer Alerts
+            </h2>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-body">Sound Alert</span>
+                <input
+                  type="checkbox"
+                  checked={alertSound}
+                  onChange={() => {
+                    setAlertSound(true);
+                    setAlertVibration(false);
+                  }}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-body">Vibration Alert</span>
+                <input
+                  type="checkbox"
+                  checked={alertVibration}
+                  onChange={() => {
+                    setAlertVibration(true);
+                    setAlertSound(false);
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="card-base p-4 opacity-100">
           <div className="flex items-center justify-between">

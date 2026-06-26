@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { AppContext } from "../App";
 import LockedFeatureModal from "../components/LockedFeatureModal";
 
@@ -6,7 +6,7 @@ export default function TimerPage() {
   const context = useContext(AppContext);
   if (!context) return null;
 
-  const { isDemo, isFull, handleStartSession, activeMinutes, points } = context;
+  const { isDemo, isFull, handleStartSession, activeMinutes } = context;
 
   const [mode, setMode] = useState<"countdown" | "stopwatch" | "hybrid">(
     "countdown"
@@ -15,8 +15,17 @@ export default function TimerPage() {
   const [hours, setHours] = useState(0);
   const [minutes, setMinutes] = useState(0);
 
+  const [timeLeft, setTimeLeft] = useState(0); // seconds
+  const [running, setRunning] = useState(false);
+
+  const intervalRef = useRef<number | null>(null);
+
   const [showLockedModal, setShowLockedModal] = useState(false);
   const [showKeyModal, setShowKeyModal] = useState(false);
+  
+  const [progress, setProgress] = useState(0); // 0 to 1
+  const totalSecondsRef = useRef(0);
+
 
   const handleLocked = () => setShowLockedModal(true);
   const handleUnlock = () => {
@@ -24,10 +33,84 @@ export default function TimerPage() {
     setShowKeyModal(true);
   };
 
+  // START SESSION
   const startSession = () => {
-    const total = hours * 60 + minutes;
-    handleStartSession(total);
+    if (mode === "countdown") {
+      const totalSecondsRef = hours * 3600 + minutes * 60;
+      const newProgress = 1 - prev / totalSecondsRef.current;
+      setProgress(newProgress);
+    }
+
+    if (mode === "stopwatch") {
+      setProgress((p) => Math.min(1, p + 0.01));
+    }
+
+    if (mode === "hybrid") {
+      if (prev > 0) {
+        totalSecondsRef.current = hours * 3600 + minutes * 60;
+        const newProgress = 1 - prev / totalSecondsRef.current;
+        setProgress(newProgress);
+      } else {
+        // Stopwatch phase
+        setProgress((p) => Math.min(1,p + 0.01));
+      }
+    };
+  }
+
+  // TIMER ENGINE
+  useEffect(() => {
+    if (!running) return;
+
+    intervalRef.current = window.setInterval(() => {
+      setTimeLeft((prev) => {
+        if (mode === "countdown") {
+          if (prev <= 1) {
+            clearInterval(intervalRef.current!);
+            setRunning(false);
+            handleStartSession((hours * 60 + minutes));
+            return 0;
+          }
+          return prev - 1;
+        }
+
+        if (mode === "stopwatch") {
+          return prev + 1;
+        }
+
+        if (mode === "hybrid") {
+          if (prev > 0) {
+            return prev - 1;
+          } else {
+            return prev + 1;
+          }
+        }
+
+        return prev;
+      });
+    }, 1000);
+
+    return () => clearInterval(intervalRef.current!);
+  }, [running, mode]);
+
+ 
+  // FORMAT TIME
+  const formatTime = (sec: number) => {
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    return `${h.toString().padStart(2, "0")}:${m
+      .toString()
+      .padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
+
+
+  // DISPLAYED TIME
+  const displayTime =
+    running || timeLeft > 0
+      ? formatTime(timeLeft)
+      : `${hours.toString().padStart(2, "0")}:${minutes
+          .toString()
+          .padStart(2, "0")}`;
 
   return (
     <div className="p-6 pb-24">
@@ -106,7 +189,7 @@ export default function TimerPage() {
 
         <div className="card-base p-4 text-center">
           <p className="text-xs text-slate-400 light:text-slate-600">
-            SESSIONS COMPLETED
+            SESSIONS COMPLEPLETED
           </p>
           <p className="text-title-md text-white light:text-slate-900">
             {Math.floor(activeMinutes / 25)}
@@ -116,55 +199,93 @@ export default function TimerPage() {
 
       {/* TIMER CARD */}
       <div className="card-base p-6 text-center mb-6">
-        {/* PROGRESS RING (static placeholder) */}
-        <div className="w-40 h-40 mx-auto rounded-full border-8 border-slate-700 light:border-slate-300 flex flex-col items-center justify-center mb-6">
-          <p className="text-sm text-slate-400 light:text-slate-600">Ready</p>
-          <p className="text-3xl text-white light:text-slate-900">
-            {hours.toString().padStart(2, "0")}:
-            {minutes.toString().padStart(2, "0")}
-          </p>
+        <div className="relative w-40 h-40 mx-auto mb-6">
+          <svg className="w-full h-full transform -rotate-90">
+            <circle
+              cx="80"
+              cy="80"
+              r="70"
+              stroke="#334155"
+              strokeWidth="10"
+              fill="none"
+            />
+            <circle
+              cx="80"
+              cy="80"
+              r="70"
+              stroke="#7c3aed"
+              strokeWidth="10"
+              fill="none"
+              strokeDasharray={440}
+              strokeDashoffset={440 - 440 * progress}
+              strokeLinecap="round"
+              className="transition-all duration-300"
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <p className="text-sm text-slate-400 light:text-slate-600">
+              {running ? "Running" : "Ready"}
+            </p>
+            <p className="text-3xl text-white light:text-slate-900">
+              {displayTime}
+            </p>
+          </div>
         </div>
 
         {/* HOURS / MINUTES SELECTORS */}
-        <div className="flex justify-between mb-4">
-          <div className="w-24">
-            <p className="text-xs text-slate-400 light:text-slate-600 mb-1">
-              Hours
-            </p>
-            <input
-              type="number"
-              min={0}
-              max={12}
-              value={hours}
-              onChange={(e) => setHours(Number(e.target.value))}
-              className="w-full px-3 py-2 rounded-lg bg-slate-900 light:bg-white border border-slate-700 light:border-slate-300 text-center text-white light:text-slate-900"
-            />
-          </div>
+        {!running && (
+          <div className="flex justify-between mb-4">
+            <div className="w-24">
+              <p className="text-xs text-slate-400 light:text-slate-600 mb-1">
+                Hours
+              </p>
+              <input
+                type="number"
+                min={0}
+                max={12}
+                value={hours}
+                onChange={(e) => setHours(Number(e.target.value))}
+                className="w-full px-3 py-2 rounded-lg bg-slate-900 light:bg-white border border-slate-700 light:border-slate-300 text-center text-white light:text-slate-900"
+              />
+            </div>
 
-          <div className="w-24">
-            <p className="text-xs text-slate-400 light:text-slate-600 mb-1">
-              Minutes
-            </p>
-            <input
-              type="number"
-              min={0}
-              max={59}
-              value={minutes}
-              onChange={(e) => setMinutes(Number(e.target.value))}
-              className="w-full px-3 py-2 rounded-lg bg-slate-900 light:bg-white border border-slate-700 light:border-slate-300 text-center text-white light:text-slate-900"
-            />
+            <div className="w-24">
+              <p className="text-xs text-slate-400 light:text-slate-600 mb-1">
+                Minutes
+              </p>
+              <input
+                type="number"
+                min={0}
+                max={59}
+                value={minutes}
+                onChange={(e) => setMinutes(Number(e.target.value))}
+                className="w-full px-3 py-2 rounded-lg bg-slate-900 light:bg-white border border-slate-700 light:border-slate-300 text-center text-white light:text-slate-900"
+              />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* START SESSION */}
-        <button
-          onClick={startSession}
-          className="w-full py-3 rounded-lg bg-blue-600 text-white"
-        >
-          Start Session
-        </button>
+        {!running && (
+          <button
+            onClick={startSession}
+            className="w-full py-3 rounded-lg bg-blue-600 text-white"
+          >
+            Start Session
+          </button>
+        )}
 
-        {/* ADJUST TIME (LOCKED FOR DEMO) */}
+        {/* STOP BUTTON */}
+        {running && (
+          <button
+            onClick={() => setRunning(false)}
+            className="w-full py-3 rounded-lg bg-red-600 text-white"
+          >
+            Stop
+          </button>
+        )}
+
+        {/* ADJUST TIME */}
         {!isFull && (
           <button
             onClick={handleLocked}

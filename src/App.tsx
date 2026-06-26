@@ -7,6 +7,7 @@ import { Task } from "./types/Task";
 import { AppContextType } from "./types/AppContextType";
 
 import BottomNav from "./components/BottomNav";
+import LeaderboardPage from "./pages/LeaderboardPage/LeaderboardPage";
 import HomePage from "./pages/HomePage";
 import HabitsPage from "./pages/HabitsPage";
 import TasksPage from "./pages/TasksPage";
@@ -62,6 +63,10 @@ export default function App() {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [points, setPoints] = useState(120);
   const [activeMinutes, setActiveMinutes] = useState(0);
+  // Alert settings
+  const [alertSound, setAlertSound] = useState(false);
+  const [alertVibration, setAlertVibration] = useState(false);
+
 
   // User name
   const [userName, setUserName] = useState(() => {
@@ -190,6 +195,11 @@ export default function App() {
 
     userName,
     setUserName,
+
+    alertSound,
+    setAlertSound,
+    alertVibration,
+    setAlertVibration,
   };
 
   return (
@@ -203,6 +213,7 @@ export default function App() {
               <Route path="/habits" element={<HabitsPage />} />
               <Route path="/timer" element={<TimerPage />} />
               <Route path="/more" element={<MorePage />} />
+              <Route path="/leaderboard" element={<LeaderboardPage />} />
             </Routes>
             <BottomNav />
           </div>

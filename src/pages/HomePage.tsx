@@ -2,6 +2,7 @@ import { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, TrendingUp, CheckCircle2, Clock } from 'lucide-react';
 import { AppContext } from '../App';
+import LeaderboardToggleButton from '../components/LeaderboardToggleButton';
 
 export default function HomePage() {
   const context = useContext(AppContext);
@@ -17,7 +18,7 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col min-h-screen pb-24 pt-6 px-4 sm:px-6 md:px-8 max-w-6xl mx-auto w-full">
-      <div className="flex items-center justify-between mb-12">
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-title-lg text-white light:text-slate-900">
             {userName && userName.trim() !== ""
@@ -30,6 +31,10 @@ export default function HomePage() {
         </div>
       </div>
 
+      <div className="mt-e mb-8">
+        <LeaderboardToggleButton />
+      </div>
+    
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div className="card-base">
           <div className="flex items-center justify-between">

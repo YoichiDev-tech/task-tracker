@@ -5,7 +5,7 @@ Task-Tracker
 
 ## SCREENSHOT
 
-![alt text](image-4.png)
+![alt text](image-6.png)
 
 
 ## DESCRIPTION
@@ -17,7 +17,7 @@ Everything is stored locally, works offline and feels like a real mobile app.
 
 ## CURRENT VERSION
 
-MVP v2.2 - 25/06/2026
+MVP v2.3 - 26/06/2026
 
 This release introduces the Premium Focus Timer System, including:
 
@@ -76,6 +76,12 @@ UI/UX
 - Reusable components
 - Clean architecture
 
+Leaderboard (New)
+- Global leaderboard layout
+- Emoji‑based avatars (lightweight, no images needed)
+- Rank‑based ordering
+- Clean list UI
+- Future‑ready for friends/groups
 
 ## TECH STACKS
 
@@ -239,10 +245,13 @@ Session history
 - Focus time locked at 0 minutes
 - Task input & habit creation flow
 - Name saving system in Settings
-- Greeting now persists across sessions
-- Developer mode unlock modal fixed
-- Contact the Developer button
+- Greeting persistence
+- Developer mode unlock modal
+- Contact Developer button
 - LocalStorage schema updated for userName
+- Leaderboard navigation crash
+- Settings page crash (alertSound / alertVibration undefined)
+
 
 ### Still pending
 - No backend sync yet
@@ -261,6 +270,9 @@ Session history
 - Work on the settings section
 - Add an about section
 - Develop the "data & privacy" section
+- Leaderboard: add friends/groups tabs
+- Leaderboard: add rank medals
+
 
 ## LEARNINGS
 
@@ -284,6 +296,11 @@ Session history
 - Widgets
 - Weekly reports
 - Achievements & gamification
+- Leaderboard friends system
+- Avatar customization
+- Premium themes
+- Calendar view for streaks
+- Notes / journal system
 
 
 ## AUTHOR
