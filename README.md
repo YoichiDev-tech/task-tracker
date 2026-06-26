@@ -276,6 +276,7 @@ Session history
 
 ## LEARNINGS
 
+ - Learned how to reconnect Vercel Git integration after webhook failure
 - Designing a scalable React architecture
 - Managing multi‑page navigation
 - Implementing theme systems with Tailwind
